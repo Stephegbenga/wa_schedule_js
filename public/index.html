@@ -100,7 +100,7 @@
             redirect: 'follow'
           };
 
-          fetch("https://asanafinder:5001/schedule", requestOptions)
+          fetch("https://asanafinder:2001/schedule", requestOptions)
             .then(response => response.text())
             .then(result => console.log(result))
             .catch(error => console.log('error', error));
