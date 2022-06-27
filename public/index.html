@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbededAppSDK.min.js"></script>
+  <style>
+    .textarea {
+      background-color: #dddddd;
+      color: #666666;
+      padding: 1em;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      outline: none;
+      font-family: "Heebo", sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 1.4;
+      width: 700px;
+      height: 100px;
+      transition: all 0.2s;
+    }
+
+    .textarea:hover {
+      cursor: pointer;
+      background-color: #eeeeee;
+    }
+
+    .textarea:focus {
+      cursor: text;
+      color: #333333;
+      background-color: white;
+      border-color: #333333;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #runbtn {
+      background-color: #04AA6D;
+      color: white;
+      font-family: 'Source Sans Pro', sans-serif;
+      font-size: 18px;
+      padding: 6px 25px;
+      margin-top: 4px;
+      border-radius: 5px;
+      word-spacing: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <p id="alert"></p>
+</body>
+
+
+
+<script>
+  var members_array = []
+
+  ZOHO.embeddedApp.on("PageLoad", function (data) {
+    console.log("Page Loaded with data");
+    // console.log(data)
+
+    const userids = data.EntityId
+
+    for (userid of userids) {
+      var user_details = {}
+      ZOHO.CRM.API.getRelatedRecords({ Entity: "MB_Memberships", RecordID: userid, page: 1, per_page: 200 })
+        .then(function (response) {
+          console.log(response.data)
+          var data = response.data[0]
+          user_details['id'] = `${data.id}`
+          user_details['expiration_date'] = `${data.MB_Expiration_Date}`
+          user_details['mobile'] = `${data.Mobile}`
+          user_details['MB_Program_Name'] = `${data.MB_Program_Name}`
+          user_details['name'] = `${data.Contact.name}`
+          console.log(user_details)
+          //  fetch post method to a url
+          var myHeaders = new Headers();
+          myHeaders.append("Content-Type", "application/json");
+
+          var raw = JSON.stringify(user_details);
+
+          var requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+          };
+
+          fetch("https://asanafinder:5001/schedule", requestOptions)
+            .then(response => response.text())
+            .then(result => console.log(result))
+            .catch(error => console.log('error', error));
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+        document.getElementById("alert").innerHTML = "Scheduled"
+
+    }
+
+
+  })
+
+
+
+  ZOHO.embeddedApp.init()
+
+
+</script>
+
+
+</html>
